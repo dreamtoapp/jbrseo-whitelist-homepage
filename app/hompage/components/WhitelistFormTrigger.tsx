@@ -55,10 +55,13 @@ export function WhitelistFormTrigger({
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      // Use requestAnimationFrame to avoid forced reflows
+      requestAnimationFrame(() => {
+        setIsMobile(window.innerWidth < 768);
+      });
     };
     checkMobile();
-    window.addEventListener("resize", checkMobile);
+    window.addEventListener("resize", checkMobile, { passive: true });
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
@@ -66,10 +69,13 @@ export function WhitelistFormTrigger({
     if (isMobile) {
       setOpen(true);
     } else {
-      const joinSection = document.getElementById("join");
-      if (joinSection) {
-        joinSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      // Defer scroll to avoid forced reflow
+      requestAnimationFrame(() => {
+        const joinSection = document.getElementById("join");
+        if (joinSection) {
+          joinSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
     }
   };
 

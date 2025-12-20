@@ -15,10 +15,13 @@ export function GTMRouteTracker({ gtmId }: GTMRouteTrackerProps) {
       return;
     }
 
-    window.dataLayer.push({
-      event: "page_view",
-      page_path: pathname,
-      page_title: document.title,
+    // Defer document.title access to avoid forced reflow
+    requestAnimationFrame(() => {
+      window.dataLayer?.push({
+        event: "page_view",
+        page_path: pathname,
+        page_title: document.title,
+      });
     });
   }, [pathname]);
 

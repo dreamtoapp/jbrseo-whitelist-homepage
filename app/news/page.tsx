@@ -3,8 +3,13 @@ import Script from "next/script";
 
 import { prisma } from "@/helpers/prisma";
 import { generateBreadcrumbsSchema } from "@/helpers/seo";
+import { cacheTag, cacheLife } from "next/cache";
 
-export default async function NewsPage() {
+async function getNewsPosts() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("news-posts");
+
   const posts = await prisma.newsPost.findMany({
     where: {
       published: true,
@@ -27,6 +32,12 @@ export default async function NewsPage() {
       createdAt: true,
     },
   });
+
+  return posts;
+}
+
+export default async function NewsPage() {
+  const posts = await getNewsPosts();
 
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://jbrseo.com").replace(/\/$/, "");
   const breadcrumbsSchema = generateBreadcrumbsSchema(

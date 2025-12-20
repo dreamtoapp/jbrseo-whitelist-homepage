@@ -9,6 +9,7 @@ import { GTMProvider } from "@/components/GTMProvider";
 import { HomeHeader } from "@/components/HomeHeader";
 import { HomePageFooter, type HomePageFooterContent } from "@/components/HomePageFooter";
 import { prisma } from "@/helpers/prisma";
+import { cacheTag, cacheLife } from "next/cache";
 import "./globals.css";
 
 const NotificationHandler = dynamic(
@@ -101,6 +102,10 @@ const tajawal = Tajawal({
 });
 
 async function getHomePageContent(): Promise<HomePageFooterContent> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("homepage-footer");
+
   const content = await prisma.homePageConfig.findUnique({
     where: { key: "default" },
     select: {
@@ -133,33 +138,48 @@ async function getHomePageContent(): Promise<HomePageFooterContent> {
   );
 }
 
+async function getSession() {
+  const session = await auth().catch(() => null);
+  return session;
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth().catch(() => null);
   const footerContent = await getHomePageContent();
 
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning className={tajawal.variable}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      </head>
       <body className="font-sans">
         <ThemeProvider>
           <Toaster />
           <Suspense fallback={null}>
             <NotificationHandler />
           </Suspense>
-          <HomeHeader session={session} />
+          <Suspense fallback={<div className="h-16 md:h-20" />}>
+            <HeaderWithSession />
+          </Suspense>
           {children}
           <HomePageFooter content={footerContent} />
-          <Suspense
-            fallback={null}
-          >
+          <Suspense fallback={null}>
             <GTMProvider />
           </Suspense>
         </ThemeProvider>
       </body>
     </html>
   );
+}
+
+async function HeaderWithSession() {
+  const session = await getSession();
+  return <HomeHeader session={session} />;
 }
 

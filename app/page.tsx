@@ -1,11 +1,13 @@
 import { HomePage } from "./hompage/components/HomePage";
 import type { Metadata } from "next";
 import { prisma } from "@/helpers/prisma";
-
-// Use ISR for the landing page to maximize performance and SEO
-export const revalidate = 300;
+import { cacheTag, cacheLife } from "next/cache";
 
 async function getHomePageContent() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("homepage-content");
+
   const content = await prisma.homePageConfig.findUnique({
     where: { key: "default" },
     select: {

@@ -4,6 +4,20 @@ import Link from "@/components/link";
 
 import { prisma } from "@/helpers/prisma";
 import { generateArticleSchema, generateBreadcrumbsSchema, generateMetaDescription } from "@/helpers/seo";
+import { cacheTag, cacheLife } from "next/cache";
+
+async function getNewsPost(slug: string) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(`news-post-${slug}`);
+  cacheTag("news-posts");
+
+  const post = await prisma.newsPost.findUnique({
+    where: { slug },
+  });
+
+  return post;
+}
 
 type Props = {
   params: Promise<{
@@ -14,24 +28,7 @@ type Props = {
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
-
-  const post = await prisma.newsPost.findUnique({
-    where: { slug: decodedSlug },
-    select: {
-      title: true,
-      content: true,
-      excerpt: true,
-      author: true,
-      tags: true,
-      metaDescription: true,
-      metaKeywords: true,
-      published: true,
-      publishedAt: true,
-      createdAt: true,
-      updatedAt: true,
-      newsType: true,
-    },
-  });
+  const post = await getNewsPost(decodedSlug);
 
   if (!post || !post.published || (post.newsType !== null && post.newsType !== "GLOBAL")) {
     return {
@@ -83,10 +80,7 @@ export async function generateMetadata({ params }: Props) {
 export default async function NewsPostPage({ params }: Props) {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
-
-  const post = await prisma.newsPost.findUnique({
-    where: { slug: decodedSlug },
-  });
+  const post = await getNewsPost(decodedSlug);
 
   if (!post || !post.published || (post.newsType !== null && post.newsType !== "GLOBAL")) {
     notFound();

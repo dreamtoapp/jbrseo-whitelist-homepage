@@ -17,11 +17,11 @@ function HeroImageWithOverlay({ imageUrl, imageAlt }: { imageUrl: string; imageA
         alt={imageAlt || "صورة توضيحية"}
         width={1280}
         height={720}
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1280px"
+        sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 768px) calc(100vw - 3rem), (max-width: 1024px) 896px, 896px"
         className="w-full h-auto object-cover transition-transform duration-500 hover:scale-[1.02]"
         priority
         fetchPriority="high"
-        quality={85}
+        quality={80}
       />
       <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-background/80 to-transparent" />
       <CTAOverlay />

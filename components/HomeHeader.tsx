@@ -33,7 +33,8 @@ function Logo() {
           alt="JBRseo Logo"
           width={40}
           height={60}
-          className="relative h-10 w-10 rounded-xl border border-foreground/10 shadow-sm transition-shadow duration-300 group-hover:shadow-md"
+          className="relative h-[60px] w-[40px] rounded-xl border border-foreground/10 shadow-sm transition-shadow duration-300 group-hover:shadow-md object-contain"
+          style={{ aspectRatio: "40/60" }}
           priority
         />
       </div>

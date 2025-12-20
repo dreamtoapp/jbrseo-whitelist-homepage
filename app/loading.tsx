@@ -119,7 +119,7 @@ export default function Loading() {
           </section>
 
           {/* Footer skeleton */}
-          <footer className="border-t border-foreground/10 bg-foreground/2 py-10">
+          <footer className="border-t border-foreground/10 bg-foreground/5 py-10">
             <div className="flex flex-col items-center gap-6">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-8 w-8 rounded-lg" />

@@ -38,7 +38,7 @@ export function HomePageFooter({ content }: HomePageFooterProps) {
   ].filter((link) => link.url);
 
   return (
-    <footer className="relative border-t border-foreground/10 bg-foreground/2" aria-label="التذييل" role="contentinfo">
+    <footer className="relative border-t border-foreground/10 bg-foreground/5" aria-label="التذييل" role="contentinfo">
       <div className="container mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="flex flex-col items-center gap-6">
           {/* Logo and Brand */}
@@ -48,7 +48,8 @@ export function HomePageFooter({ content }: HomePageFooterProps) {
               alt="JBRseo Logo"
               width={36}
               height={36}
-              className="h-8 w-8 rounded-lg opacity-80"
+              className="h-8 w-8 rounded-lg opacity-80 object-contain"
+              style={{ aspectRatio: "1/1" }}
             />
             <span className="text-base font-semibold text-foreground/70">JBRseo</span>
           </div>
@@ -89,7 +90,7 @@ export function HomePageFooter({ content }: HomePageFooterProps) {
           </div>
 
           {/* Copyright */}
-          <p className="text-center text-xs text-foreground/40">
+          <p className="text-center text-xs text-foreground/70">
             {content.footerCopyright}
           </p>
         </div>
