@@ -1,0 +1,95 @@
+name: Route Folder Structure Rule
+description: Enforce per-route components/actions/helpers folders under Next.js App Router segments to keep page-local logic isolated and avoid duplication.
+tags:
+  - nextjs
+  - app-router
+  - folder-structure
+  - components
+  - actions
+  - helpers
+
+rules: |
+  # 🔐 SCOPE
+  # Apply these rules to every route segment under `app/`, for example:
+  #   app/[locale]/admin/organizational-structure
+
+  # 1️⃣ ROUTE-LOCAL FOLDERS
+  # Each non-trivial route segment MAY/SHOULD have:
+  #
+  #   app/[locale]/admin/organizational-structure/
+  #     - page.tsx
+  #     - layout.tsx (optional)
+  #     - components/      # UI only used by this route
+  #     - actions/         # server actions only used by this route
+  #     - helpers/         # utilities only used by this route
+  #
+  # These subfolders are ONLY for code used exclusively by this route.
+
+  # 2️⃣ COMPONENTS RULE
+  # - UI used ONLY by this route lives in:
+  #     app/[locale]/admin/organizational-structure/components/
+  #
+  # - `page.tsx` can compose UI, but any reusable or complex UI block must be
+  #   extracted into a component in `components/`.
+  #
+  # - If a component is reused across multiple routes, it MUST live in the
+  #   global `components/` tree and be imported from there.
+  #
+  # - No duplicated JSX between route-local and global components: share via
+  #   a single component + props.
+
+  # 3️⃣ ACTIONS RULE
+  # - Server actions used ONLY by this route live in:
+  #     app/[locale]/admin/organizational-structure/actions/
+  #
+  # - Shared actions (used by multiple routes) live in global `actions/`.
+
+  # 4️⃣ HELPERS RULE
+  # - Utilities used ONLY by this route live in:
+  #     app/[locale]/admin/organizational-structure/helpers/
+  #
+  # - Shared helpers (used by multiple routes/features) live in global
+  #   `helpers/` (e.g. `helpers/extractMetrics.ts`).
+  #
+  # - Never copy/paste logic from a global helper into a route helper;
+  #   always import from the shared source.
+
+  # 5️⃣ NO DUPLICATION / NO SHADOWING
+  # - Route-local `components/`, `actions/`, `helpers/` MUST NOT re-implement
+  #   or copy logic already present in global folders.
+  #
+  # - If logic/UI becomes shared, extract it to the global tree and delete
+  #   duplicates.
+
+  # 6️⃣ PAGE FILE CONTENTS
+  # - `page.tsx` is responsible for:
+  #   - Reading `params` / `searchParams` / session.
+  #   - Calling helpers/actions to get data.
+  #   - Composing local + global components into the final layout.
+  #
+  # - `page.tsx` must NOT contain:
+  #   - Deeply nested reusable JSX (extract to `components/`).
+  #   - Business logic that can be shared (move to `helpers/` or global helpers).
+  #   - Server action bodies (move to `actions/` and import).
+
+  # 7️⃣ ORGANIZATIONAL-STRUCTURE EXAMPLE
+  # For `app/[locale]/admin/organizational-structure`:
+  #
+  #   - Shared data: `helpers/extractMetrics.ts` (e.g. `getTeamPositions`)
+  #   - Route-local helpers: `helpers/computeOrganizationalMetrics.ts`
+  #   - Route-local UI: `components/OrganizationalStructure.tsx`
+  #
+  #   - `page.tsx`:
+  #     - imports shared helpers from global `helpers/`
+  #     - imports route helpers from `helpers/`
+  #     - imports route components from `components/`
+  #     - renders header + metrics + `<OrganizationalStructure />`.
+
+  # 8️⃣ ENFORCEMENT QUESTIONS
+  # Before adding/moving code, always ask:
+  #   - Is this UI only for this route? → route `components/`.
+  #   - Is this logic only for this route? → route `helpers/` or `actions/`.
+  #   - Is it shared? → global `components/`, `helpers/`, or `actions/`.
+  #
+  # Never leave page-specific code in global folders.
+  # Never move shared code into route-local folders.

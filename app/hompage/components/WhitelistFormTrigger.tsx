@@ -1,0 +1,108 @@
+"use client";
+
+import { createContext, useContext, ReactNode, useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Zap, ArrowLeft } from "lucide-react";
+
+type WhitelistFormContextType = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+};
+
+const WhitelistFormContext = createContext<WhitelistFormContextType | null>(
+  null
+);
+
+export function WhitelistFormProvider({
+  children,
+  open,
+  setOpen,
+}: {
+  children: ReactNode;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}) {
+  return (
+    <WhitelistFormContext.Provider value={{ open, setOpen }}>
+      {children}
+    </WhitelistFormContext.Provider>
+  );
+}
+
+export function useWhitelistForm() {
+  const context = useContext(WhitelistFormContext);
+  if (!context) {
+    throw new Error(
+      "useWhitelistForm must be used within WhitelistFormProvider"
+    );
+  }
+  return context;
+}
+
+type WhitelistFormTriggerProps = {
+  children?: ReactNode;
+  className?: string;
+  variant?: "default" | "floating";
+};
+
+export function WhitelistFormTrigger({
+  children,
+  className,
+  variant = "default",
+}: WhitelistFormTriggerProps) {
+  const { setOpen } = useWhitelistForm();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const handleClick = () => {
+    if (isMobile) {
+      setOpen(true);
+    } else {
+      const joinSection = document.getElementById("join");
+      if (joinSection) {
+        joinSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  };
+
+  if (variant === "floating") {
+    return (
+      <Button
+        onClick={handleClick}
+        className={`flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-l from-emerald-600 to-teal-600 py-3.5 text-base font-bold text-background shadow-lg shadow-emerald-500/25 ${className || ""}`}
+      >
+        <Zap className="h-5 w-5" />
+        <span>سجّل الآن — مجاناً</span>
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      onClick={handleClick}
+      className={`group inline-flex items-center gap-2 rounded-full bg-linear-to-l from-emerald-600 to-teal-600 px-8 py-4 text-base font-bold text-background shadow-xl shadow-emerald-500/25 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/30 ${className || ""}`}
+    >
+      {children || (
+        <>
+          <Zap className="h-5 w-5" />
+          <span>احجز مكانك الآن — مجاناً</span>
+          <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+        </>
+      )}
+    </Button>
+  );
+}
+
+
+
+
+
+

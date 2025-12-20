@@ -1,0 +1,348 @@
+---
+alwaysApply: true
+---
+
+# Codebase Pattern Consistency Rule
+
+Enforce consistent patterns across the Next.js app to maintain code quality, performance, and maintainability standards.
+
+## 1. Server/Client Component Patterns
+
+### Server Components (Default)
+
+- Server components are the default - NO "use client" directive unless needed
+- Server components can directly fetch data from database/APIs
+- Server components can use async/await
+- Server components must NOT use:
+  - React hooks (useState, useEffect, useContext, etc.)
+  - Browser APIs (window, document, localStorage, etc.)
+  - Event handlers (onClick, onChange, etc.) - use client components instead
+
+### Client Components
+
+- MUST have "use client" directive at the very top of the file (before imports)
+- Use for interactive features: forms, buttons, modals, animations
+- Use for browser APIs: localStorage, window, document
+- Use dynamic imports for heavy client components that aren't immediately needed:
+  ```typescript
+  const HeavyComponent = dynamic(() => import('./HeavyComponent'));
+  ```
+
+### Server Actions
+
+- MUST be in separate files with "use server" directive at the top
+- Place in `actions/` folder (global) or `app/[route]/actions/` (route-local)
+- Example structure:
+
+  ```typescript
+  'use server';
+
+  import { auth } from '@/auth';
+  import { prisma } from '@/helpers/prisma';
+
+  async function requireAdmin() {
+    const session = await auth();
+    if (!session || session.user.role !== 'ADMIN') {
+      throw new Error('unauthorized');
+    }
+    return session;
+  }
+
+  export async function actionName(input: InputType) {
+    await requireAdmin();
+    // ... implementation
+  }
+  ```
+
+## 2. Performance Optimization Patterns
+
+### ISR (Incremental Static Regeneration)
+
+- Use `export const revalidate = 300` for pages that need periodic updates
+- Example: Landing pages, news listings, public content pages
+
+### Dynamic Imports
+
+- Use `next/dynamic` for client components that aren't immediately needed
+- Use for modals, drawers, heavy interactive components
+- Example:
+  ```typescript
+  const FloatingCTA = dynamic(() =>
+    import('./FloatingCTA').then((mod) => ({ default: mod.FloatingCTA })),
+  );
+  ```
+
+### Prisma Query Optimization
+
+- ALWAYS use `select` to fetch only needed fields
+- Never use `findMany()` without `select` for large datasets
+- Example:
+  ```typescript
+  const posts = await prisma.newsPost.findMany({
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      published: true,
+    },
+  });
+  ```
+
+### Package Optimization
+
+- Already configured in `next.config.ts` for lucide-react and radix-ui
+- Add more packages to `optimizePackageImports` as needed
+
+## 3. Type Safety Patterns
+
+### No Any/Unknown
+
+- NEVER use `any` or `unknown` types
+- Use proper TypeScript types or interfaces
+- Use `z.infer<typeof schema>` for Zod schema types
+
+### Zod Validation
+
+- Use Zod schemas for ALL form inputs and server action inputs
+- Define schemas before the action/component
+- Example:
+
+  ```typescript
+  const formSchema = z.object({
+    title: z.string().trim().min(1).max(180),
+    content: z.string().trim().min(1).max(5000),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
+  ```
+
+### Props Types
+
+- Define Props interface/type for ALL components
+- Place Props definition near the component
+- Example:
+
+  ```typescript
+  type Props = {
+    post: {
+      id: string;
+      title: string;
+      slug: string;
+    };
+  };
+
+  export function Component({ post }: Props) {
+    // ...
+  }
+  ```
+
+### Type Exports
+
+- Export types from server actions when used by client components
+- Example:
+  ```typescript
+  export type HomePageConfigData = {
+    heroTitlePrimary: string;
+    heroDescription: string;
+    // ...
+  };
+  ```
+
+## 4. Component Structure Patterns
+
+### Page Components (`page.tsx`)
+
+- MUST use default export
+- MUST be async Server Components (unless client-side only)
+- Fetch data directly in the component
+- Compose UI from smaller components
+- Example:
+  ```typescript
+  export default async function Page() {
+    const data = await fetchData();
+    return <PageContent data={data} />;
+  }
+  ```
+
+### Reusable Components
+
+- Use named exports
+- Place in `components/` (global) or `app/[route]/components/` (route-local)
+- Keep components focused and single-purpose
+
+### Form Components
+
+- MUST use react-hook-form with zodResolver
+- Define Zod schema for validation
+- Use shadcn/ui Form components
+- Example:
+  ```typescript
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      /* ... */
+    },
+  });
+  ```
+
+## 5. Server Action Patterns
+
+### Required Structure
+
+1. "use server" directive at top
+2. Auth check helper (e.g., `requireAdmin()`)
+3. Zod schema validation
+4. Database operation
+5. `revalidatePath` after mutations
+6. Consistent return types
+
+### Error Handling
+
+- Return typed success/error objects
+- Example:
+  ```typescript
+  return { success: true } as const;
+  // or
+  return { success: false, error: 'message' } as const;
+  ```
+
+### Revalidation
+
+- Call `revalidatePath` after mutations that affect cached pages
+- Revalidate all affected routes
+- Example:
+  ```typescript
+  revalidatePath('/dashboard/news');
+  revalidatePath('/news');
+  ```
+
+## 6. SEO Patterns
+
+### Metadata Generation
+
+- Dynamic routes MUST have `generateMetadata` function
+- Include canonical URLs
+- Include OpenGraph tags
+- Include Twitter card tags
+- Generate meta descriptions from content when missing
+
+### Structured Data
+
+- Use helper functions from `helpers/seo.ts`
+- Use JSON-LD format via `<Script>` component
+- Include Article schema for news posts
+- Include Breadcrumb schema for navigation
+
+### Example Metadata:
+
+```typescript
+export async function generateMetadata({ params }: Props) {
+  const { slug } = await params;
+  const post = await fetchPost(slug);
+
+  return {
+    title: `${post.title} | JBRseo`,
+    description: post.metaDescription || generateMetaDescription(post.content),
+    alternates: { canonical: url },
+    openGraph: {
+      /* ... */
+    },
+    twitter: {
+      /* ... */
+    },
+  };
+}
+```
+
+## 7. Data Fetching Patterns
+
+### Server Components
+
+- Fetch data directly in the component (async/await)
+- NO useEffect for initial data fetching
+- Use Prisma queries with `select` for performance
+
+### Error Handling
+
+- Use `notFound()` for missing resources
+- Handle errors gracefully with try/catch when needed
+
+### Example:
+
+```typescript
+export default async function Page({ params }: Props) {
+  const { slug } = await params;
+  const post = await prisma.newsPost.findUnique({
+    where: { slug },
+    select: {
+      /* only needed fields */
+    },
+  });
+
+  if (!post) {
+    notFound();
+  }
+
+  return <PostContent post={post} />;
+}
+```
+
+## 8. Folder Structure
+
+### Global Folders
+
+- `components/` - Shared UI components
+- `actions/` - Shared server actions
+- `helpers/` - Shared utility functions
+
+### Route-Local Folders
+
+- `app/[route]/components/` - Components only used by this route
+- `app/[route]/actions/` - Server actions only used by this route
+- `app/[route]/helpers/` - Utilities only used by this route
+
+### Rules
+
+- If code is used by multiple routes → move to global folder
+- If code is only used by one route → keep in route-local folder
+- Never duplicate code between global and route-local folders
+
+## 9. UI Component Patterns
+
+### shadcn/ui
+
+- ALWAYS use shadcn/ui components (default, no exceptions)
+- Import from `@/components/ui/[component]`
+- Use existing components, don't create custom ones unless necessary
+
+### Styling
+
+- Use Tailwind CSS utility classes
+- Keep classes composable and semantic
+- Follow existing design system patterns
+
+## 10. Verification Checklist
+
+Before submitting code, verify:
+
+- [ ] Server/client boundaries are correct
+- [ ] Performance optimizations applied (ISR, dynamic imports, Prisma select)
+- [ ] Type safety maintained (no any/unknown, proper types)
+- [ ] Component structure follows patterns (default export for pages, named for reusable)
+- [ ] Server actions follow required structure
+- [ ] SEO patterns applied (metadata, structured data)
+- [ ] Data fetching optimized (select fields, proper error handling)
+- [ ] Folder structure correct (global vs route-local)
+- [ ] shadcn/ui components used
+- [ ] No console.log in production code
+- [ ] All TypeScript errors resolved
+
+## Enforcement
+
+These patterns are MANDATORY for all new code. When reviewing or modifying existing code:
+
+1. Identify which patterns apply
+2. Ensure code follows the patterns
+3. Refactor if needed to match patterns (within scope of task)
+4. Document any exceptions with clear reasoning
+

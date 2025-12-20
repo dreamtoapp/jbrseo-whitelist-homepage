@@ -1,0 +1,251 @@
+```yaml
+---
+alwaysApply: true
+name: "Codebase Pattern Consistency (Next.js 15 + TS + Prisma + shadcn/ui)"
+version: "1.2.0"
+scope:
+  appliesTo:
+    - "app/**"
+    - "components/**"
+    - "actions/**"
+    - "helpers/**"
+  excludes:
+    - "**/*.test.*"
+    - "**/*.spec.*"
+    - "node_modules/**"
+    - ".next/**"
+    - "dist/**"
+
+principles:
+  - "Server Components by default"
+  - "Strict type safety (no any/unknown)"
+  - "Performance-first (select, caching, dynamic imports when appropriate)"
+  - "Consistency over creativity"
+  - "shadcn/ui only for UI primitives"
+  - "SEO completeness for public routes"
+  - "No code duplication across global vs route-local"
+
+enforcement:
+  level: "mandatory"
+  exceptions:
+    allowedOnlyWhen:
+      - "Explicitly requested by the user OR required by platform constraints"
+    mustInclude:
+      - "A short comment explaining why the exception is necessary"
+      - "The minimal scope change to satisfy the requirement"
+
+rules:
+
+  serverClientBoundaries:
+    serverComponents:
+      default: true
+      mustNotUse:
+        - "useState"
+        - "useEffect"
+        - "useContext"
+        - "useReducer"
+        - "useRef"
+        - "window"
+        - "document"
+        - "localStorage"
+        - "sessionStorage"
+        - "onClick"
+        - "onChange"
+        - "onSubmit"
+      allowed:
+        - "async/await data fetching"
+        - "direct Prisma reads"
+        - "notFound() for missing resources"
+      patterns:
+        - "app/**/page.tsx MUST be default export and Server Component unless interaction requires client"
+        - "Compose pages from smaller named-export components"
+
+    clientComponents:
+      whenToUse:
+        - "Forms"
+        - "Interactive UI (buttons, modals, drawers, animations)"
+        - "Browser APIs"
+        - "Event handlers"
+      requirements:
+        - "\"use client\" must be the first statement (before imports)"
+        - "Keep client components minimal and presentational when possible"
+        - "Prefer passing server-fetched data as props"
+      dynamicImports:
+        useWhen:
+          - "Heavy client components not needed on initial render (modals, drawers, editors, charts)"
+        patternExamples:
+          - "const X = dynamic(() => import('./X').then(m => ({ default: m.X })));"
+
+  serverActions:
+    placement:
+      global: "actions/**"
+      routeLocal: "app/**/actions/**"
+    requirements:
+      - "\"use server\" must be the first statement"
+      - "Input validation with Zod (no unvalidated inputs)"
+      - "Authorization guard helper (e.g., requireAdmin / requireAuth)"
+      - "Consistent typed return objects (no throwing for expected errors)"
+      - "revalidatePath for all affected cached routes after mutations"
+    structureTemplate:
+      orderedSteps:
+        - "use server"
+        - "imports"
+        - "auth/role guard helper"
+        - "zod schema"
+        - "action implementation"
+        - "revalidatePath calls"
+        - "return typed result"
+    returnTypeStandard:
+      success:
+        example: "{ success: true, data?: T }"
+      failure:
+        example: "{ success: false, error: '...' }"
+      constraints:
+        - "Never return untyped objects"
+        - "Never return raw Prisma errors to the client"
+        - "Map known errors to user-safe messages"
+    mustNotUse:
+      - "any"
+      - "unknown"
+      - "console.log"
+
+  dataFetching:
+    serverFirst:
+      - "Fetch in Server Components directly (no useEffect for initial fetch)"
+    errorHandling:
+      - "Use notFound() for missing resources in routes"
+      - "Use try/catch only when you can add meaningful fallback behavior"
+    prismaOptimization:
+      mandatory:
+        - "ALWAYS use select"
+        - "Never use findMany without select for large datasets"
+      recommended:
+        - "Use where + take + cursor pagination when lists can grow"
+        - "Prefer minimal relations and explicit selects for nested data"
+    cachingAndISR:
+      isr:
+        useWhen:
+          - "Public pages with periodic updates"
+        defaultRevalidateSeconds: 300
+      notes:
+        - "Do not apply ISR to personalized/authenticated pages unless explicitly intended"
+
+  typeSafety:
+    forbiddenTypes:
+      - "any"
+      - "unknown"
+    requiredPatterns:
+      - "Use z.infer<typeof schema> for form/action inputs"
+      - "Define Props types for all components"
+      - "Export types from server actions when consumed by client components"
+    props:
+      placement: "near component definition"
+    constraints:
+      - "No implicit any"
+      - "No ts-ignore unless explicitly justified with a comment"
+
+  componentConventions:
+    pages:
+      must:
+        - "default export"
+        - "async Server Component by default"
+      should:
+        - "Call a single fetch function when logic grows"
+        - "Delegate UI to route-local components"
+    reusableComponents:
+      must:
+        - "named exports"
+        - "single-purpose"
+      placement:
+        global: "components/** when used across routes"
+        routeLocal: "app/**/components/** when used only in one route"
+    naming:
+      conventions:
+        files: "PascalCase for components, camelCase for utilities, Next.js conventions for special files"
+        exports: "Named exports for components; default export only for pages/layouts"
+
+  forms:
+    requirements:
+      - "react-hook-form + zodResolver"
+      - "Use shadcn/ui Form primitives"
+      - "Define schema first, then types, then component"
+      - "No client-side fetch for mutations when server actions exist"
+    defaults:
+      - "Provide defaultValues for all fields"
+      - "Use controlled components via RHF"
+    validation:
+      - "Server must re-validate even if client validates"
+
+  uiSystem:
+    shadcnMandatory: true
+    imports:
+      pattern: "@/components/ui/<component>"
+    styling:
+      - "Tailwind utility classes only"
+      - "Prefer semantic utility grouping and avoid arbitrary values unless necessary"
+    forbidden:
+      - "Re-implementing shadcn primitives without strong reason"
+
+  seo:
+    metadata:
+      dynamicRoutesMustHave: "generateMetadata"
+      mustInclude:
+        - "title"
+        - "description"
+        - "alternates.canonical"
+        - "openGraph"
+        - "twitter"
+      descriptionFallback:
+        - "Generate from content when missing"
+    structuredData:
+      requiredFor:
+        - "Articles/news posts: Article JSON-LD"
+        - "Breadcrumbs on hierarchical pages"
+      implementation:
+        - "Use helpers from helpers/seo.ts"
+        - "Use JSON-LD via next/script"
+    constraints:
+      - "No misleading metadata"
+      - "Canonical must match final public URL"
+
+  folderStructure:
+    globalFolders:
+      - "components/"
+      - "actions/"
+      - "helpers/"
+    routeLocalFolders:
+      - "app/<route>/components/"
+      - "app/<route>/actions/"
+      - "app/<route>/helpers/"
+    rules:
+      - "If used by multiple routes -> move to global"
+      - "If used by one route -> keep route-local"
+      - "Never duplicate logic in both global and route-local"
+
+  qualityGates:
+    mustPassBeforeSubmit:
+      - "Server/client boundaries correct"
+      - "Performance optimizations applied (select, caching/ISR where appropriate, dynamic imports where relevant)"
+      - "No any/unknown"
+      - "No console.log"
+      - "No unused imports"
+      - "All TypeScript errors resolved"
+      - "revalidatePath after mutations"
+      - "SEO metadata + structured data where applicable"
+    reviewerChecklist:
+      - "Is the component server by default?"
+      - "Is interactivity isolated to small client components?"
+      - "Is Prisma selecting only required fields?"
+      - "Is input validated with Zod on the server?"
+      - "Are return types consistent and safe?"
+
+outputPreferences:
+  codeStyle:
+    - "TypeScript only"
+    - "Short, purposeful comments"
+    - "SOLID-oriented structure"
+  changePolicy:
+    - "Refactor only within the scope of the task"
+    - "Do not perform broad rewrites without explicit request"
+---
+```

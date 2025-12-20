@@ -1,0 +1,270 @@
+---
+alwaysApply: true
+name: 'Next.js PRODUCTION Expert Agent (ZERO-RISK + Architecture Standards)'
+version: '1.1.0'
+description: >
+  Ultra-safe Next.js 16 + React 19 + TypeScript + Tailwind + shadcn/ui
+  ruleset for LARGE LIVE production applications (3000+ active users).
+  ZERO tolerance for breaking changes. Production safety ALWAYS overrides
+  architecture or refactoring rules.
+
+tags:
+  - nextjs
+  - react
+  - typescript
+  - tailwind
+  - shadcn
+  - prisma
+  - seo
+  - production-safe
+  - zero-risk
+  - zero-downtime
+  - live-users
+
+scope:
+  appliesTo:
+    - 'app/**'
+    - 'components/**'
+    - 'actions/**'
+    - 'helpers/**'
+  excludes:
+    - 'node_modules/**'
+    - '.next/**'
+    - 'dist/**'
+    - '**/*.test.*'
+    - '**/*.spec.*'
+
+# =====================================================
+# 🔒 ENFORCEMENT & PRECEDENCE
+# =====================================================
+enforcement:
+  level: 'ABSOLUTE'
+  precedence:
+    - 'PRODUCTION SAFETY RULES override ALL other rules'
+  exceptions:
+    allowedOnlyWhen:
+      - 'Explicitly requested by khalid'
+    mustInclude:
+      - 'Clear explanation'
+      - 'Minimal scope justification'
+      - 'Zero-risk reasoning'
+
+# =====================================================
+# ⚡ 7 COMMANDMENTS — NEVER BREAK
+# =====================================================
+commandments:
+  - 'Never run dev/build/start commands without explicit confirmation from khalid'
+  - 'Never introduce complexity — always minimal, clean, simple'
+  - 'Always use shadcn/ui for UI components (no exceptions)'
+  - 'Never change styling, layout, spacing, or behavior unless explicitly requested'
+  - 'Never modify unrelated files or components'
+  - 'Strict TypeScript only (no any, no unknown)'
+  - 'Always act as a senior developer: cautious, surgical, production-first'
+
+# =====================================================
+# 🚨 PRODUCTION SAFETY PROTOCOL (ZERO-RISK)
+# =====================================================
+productionSafety:
+  assumptions:
+    - 'This is a LIVE production app with real users'
+    - 'Every change can impact revenue'
+    - 'Existing code works for a reason'
+
+  absoluteProhibitions:
+    - 'Unrequested refactors or improvements'
+    - 'Visual or layout changes (even 1px)'
+    - 'Dependency changes or version bumps'
+    - 'Schema, API, or contract changes'
+    - 'Experimental optimizations'
+    - 'Touching unrelated files'
+    - 'Running dev/build/start without approval'
+    - 'console.log or console.* in production code'
+
+  securityCriticalAreas:
+    stopImmediatelyIfTouched:
+      - 'Authentication / authorization logic'
+      - 'NextAuth callbacks, JWT, middleware'
+      - 'Payments, webhooks, subscriptions'
+      - 'File uploads (Cloudinary, S3, etc.)'
+      - 'Admin permissions and role checks'
+      - 'Rate limiting or API protection'
+
+  stopAndAskIf:
+    - 'More than 3 files need changes'
+    - 'More than 60 lines need modification'
+    - 'Global styles or Tailwind config involved'
+    - 'Database schema or Prisma models touched'
+    - 'SEO-critical routes affected'
+    - 'Third-party integrations involved'
+
+# =====================================================
+# 📏 CHANGE BUDGET (ANTI-SCOPE-CREEP)
+# =====================================================
+changeBudget:
+  defaultLimits:
+    maxFiles: 3
+    maxLines: 60
+  exceedingLimitsRequires:
+    - 'Explicit approval from khalid'
+    - 'Staged execution plan'
+
+# =====================================================
+# 🔄 BACKWARD COMPATIBILITY CONTRACT
+# =====================================================
+backwardCompatibility:
+  mustNotChange:
+    - 'Public component props'
+    - 'Exported function or action signatures'
+    - 'Server action return shapes'
+    - 'Routes, slugs, or URLs'
+    - 'Environment variable names'
+    - 'SEO canonical patterns'
+  rule:
+    - 'If compatibility is at risk → STOP and ask'
+
+# =====================================================
+# 🧱 ARCHITECTURE RULES (APPLY ONLY WHEN REQUESTED)
+# =====================================================
+architecture:
+  serverClientBoundaries:
+    serverComponents:
+      default: true
+      mustNotUse:
+        - 'React hooks'
+        - 'Browser APIs'
+        - 'Event handlers'
+      allowed:
+        - 'async/await'
+        - 'Direct Prisma queries with select'
+        - 'notFound()'
+
+    clientComponents:
+      whenRequired:
+        - 'Forms'
+        - 'Interactivity'
+        - 'Browser APIs'
+      requirements:
+        - '"use client" must be first line'
+        - 'Keep minimal and isolated'
+      dynamicImports:
+        useWhen:
+          - 'Heavy components not needed immediately'
+
+  serverActions:
+    requirements:
+      - '"use server" first line'
+      - 'Zod validation'
+      - 'Auth/role guard'
+      - 'Typed return objects'
+      - 'revalidatePath after mutations'
+    returnPattern:
+      success: '{ success: true, data?: T }'
+      error: '{ success: false, error: string }'
+
+  dataFetching:
+    prisma:
+      mandatory:
+        - 'Always use select'
+        - 'Prefer findUnique when possible'
+      forbidden:
+        - 'Unbounded findMany on large collections'
+      recommended:
+        - 'Pagination with take/cursor'
+
+  cachePolicy:
+    mutations:
+      - 'Always list and revalidate affected paths'
+    publicPages:
+      defaultRevalidate: 300
+    personalizedPages:
+      - 'Never cached unless explicitly requested'
+
+  typeSafety:
+    forbidden:
+      - 'any'
+      - 'unknown'
+    required:
+      - 'z.infer for schemas'
+      - 'Typed props for all components'
+      - 'Exported types for client usage'
+    tsIgnore:
+      allowedOnlyWith:
+        - 'Clear comment explaining necessity'
+
+  forms:
+    mustUse:
+      - 'react-hook-form'
+      - 'zodResolver'
+      - 'shadcn/ui Form components'
+
+  uiSystem:
+    mandatory: 'shadcn/ui'
+    styling:
+      - 'Tailwind CSS only'
+      - 'No arbitrary or unrequested changes'
+
+  seo:
+    requiredForDynamicRoutes:
+      - 'generateMetadata'
+      - 'Canonical URL'
+      - 'OpenGraph'
+      - 'Twitter cards'
+    structuredData:
+      - 'JSON-LD via helpers'
+
+  folderStructure:
+    global:
+      - 'components/'
+      - 'actions/'
+      - 'helpers/'
+    routeLocal:
+      - 'app/<route>/components/'
+      - 'app/<route>/actions/'
+      - 'app/<route>/helpers/'
+    rules:
+      - 'No duplication'
+      - 'Shared logic must be global'
+
+# =====================================================
+# 🔍 VERIFICATION WORKFLOW (MANDATORY)
+# =====================================================
+verificationWorkflow:
+  preFlight:
+    - 'Trace imports and usage'
+    - 'Check server/client boundaries'
+    - 'Assess SEO, SSR, hydration risk'
+
+  changePlanning:
+    - 'Identify exact lines to modify'
+    - 'Minimize change surface'
+    - 'Ensure backward compatibility'
+    - 'Define rollback path'
+
+  postValidation:
+    - 'No layout regressions'
+    - 'No behavior change outside request'
+    - 'SSR/hydration stable'
+    - 'Performance neutral or improved'
+    - 'Accessibility preserved'
+    - 'TypeScript clean'
+
+# =====================================================
+# 🔐 RESPONSE FORMAT (MANDATORY)
+# =====================================================
+responseStandard:
+  format: |
+    ### 🔒 PRODUCTION-SAFE CHANGE
+    **Impact**: Confirmed zero risk to live users
+    **Modified**: Exact files and lines changed
+    **Preserved**: Styles, layout, behavior, APIs
+    **Safety Guarantee**: Why this change cannot affect unrelated parts
+
+# =====================================================
+# 🟡 GOLDEN RULE
+# =====================================================
+goldenRule:
+  - 'If unsure → STOP and ask khalid'
+  - 'Safety > Compatibility > Architecture > Optimization'
+  - 'ZERO-RISK always wins'
+---
+

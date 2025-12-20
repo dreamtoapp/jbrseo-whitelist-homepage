@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum NewsType {
+  GLOBAL
+  APP
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  COMPLETED
+  PAUSED
+  CANCELLED
+}
+
+enum RecipientType {
+  SUBSCRIBER
+  IMPORTED
+}
+
+enum RecipientStatus {
+  PENDING
+  SENT
+  FAILED
+  BOUNCED
+  UNSUBSCRIBED
+}
+
+enum EmailEventType {
+  SENT
+  OPENED
+  CLICKED
+  BOUNCED
+  COMPLAINED
+}
+
+model Subscriber {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  mobile    String?
+  brandName String
+  country   String?
+  city      String?
+  verified  Boolean  @default(false)
+  verifiedAt DateTime?
+  otpCode   String?
+  otpExpiresAt DateTime?
+  verifyToken String?
+  verifyTokenExpiresAt DateTime?
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([email])
+  @@map("subscribers")
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(CLIENT)
+  accounts      Account[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model NewsPost {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  slug            String    @unique
+  content         String
+  excerpt         String?
+  author          String?
+  tags            String[]
+  metaDescription String?
+  metaKeywords    String[]
+  published       Boolean   @default(false)
+  publishedAt     DateTime?
+  newsType        NewsType?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("news_posts")
+}
+
+model HomePageConfig {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  key String @unique
+
+  heroTitlePrimary   String
+  heroTitleSecondary String
+  heroDescription    String
+  bullets            String[]
+  heroImageUrl       String?
+  heroImageAlt       String?
+
+  joinTitle       String
+  joinDescription String
+  privacyText     String
+  badgeText       String
+
+  footerCopyright    String
+  footerJoinLinkText String
+  footerContactEmail String
+  footerContactText  String
+
+  facebookUrl           String?
+  instagramUrl          String?
+  linkedinUrl           String?
+  twitterUrl            String?
+  whatsappCommunityUrl  String?
+  telegramChannelUrl    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("homepage_config")
+}
+
+model AppSettings {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+
+  key String @unique
+
+  gtmId           String?
+  hotjarSiteId    String?
+  hotjarVersion   Int?
+  twitterPixelId  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
+}
+
+model EmailList {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  email      String   @unique
+  name       String?
+  source     String
+  importedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  recipients CampaignRecipient[]
+
+  @@map("email_lists")
+}
+
+model Campaign {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  subject       String
+  htmlContent   String
+  textContent   String?
+  status        CampaignStatus  @default(DRAFT)
+  scheduledAt   DateTime?
+  sentAt        DateTime?
+  totalRecipients Int           @default(0)
+  sentCount     Int             @default(0)
+  openedCount   Int             @default(0)
+  clickedCount  Int             @default(0)
+  bouncedCount  Int             @default(0)
+  unsubscribedCount Int         @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  recipients    CampaignRecipient[]
+
+  @@map("campaigns")
+}
+
+model CampaignRecipient {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  campaignId      String          @db.ObjectId
+  recipientType   RecipientType
+  subscriberId    String?         @db.ObjectId
+  emailListId     String?         @db.ObjectId
+  email           String
+  status          RecipientStatus @default(PENDING)
+  sentAt          DateTime?
+  openedAt        DateTime?
+  clickedAt       DateTime?
+  bouncedAt       DateTime?
+  unsubscribedAt DateTime?
+  errorMessage    String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  campaign        Campaign        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  emailList       EmailList?      @relation(fields: [emailListId], references: [id], onDelete: SetNull)
+
+  @@index([campaignId])
+  @@index([email])
+  @@map("campaign_recipients")
+}
+
+model EmailEvent {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  emailId       String?
+  recipientEmail String
+  eventType     EmailEventType
+  eventData     String        @default("{}")
+  createdAt     DateTime      @default(now())
+
+  @@index([recipientEmail])
+  @@index([eventType])
+  @@map("email_events")
+}
