@@ -5,7 +5,7 @@ import { cacheTag, cacheLife } from "next/cache";
 
 async function getHomePageContent() {
   "use cache";
-  cacheLife("hours");
+  cacheLife("minutes");
   cacheTag("homepage-content");
 
   const content = await prisma.homePageConfig.findUnique({
