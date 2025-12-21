@@ -27,13 +27,13 @@ function Logo() {
       className="group flex items-center gap-3 transition-transform duration-300 hover:scale-[1.02]"
     >
       <div className="relative">
-        <div className="absolute -inset-1 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 opacity-0 blur transition-opacity duration-300 group-hover:opacity-100" />
+        <div className="absolute -inset-1 rounded-xl bg-linear-to-br from-primary/20 to-accent/20 opacity-0 blur transition-opacity duration-300 group-hover:opacity-100" />
         <Image
           src="/assets/logo.png"
           alt="JBRseo Logo"
           width={40}
           height={60}
-          className="relative h-[60px] w-[40px] rounded-xl border border-foreground/10 shadow-sm transition-shadow duration-300 group-hover:shadow-md object-contain"
+          className="relative h-[60px] w-[40px] rounded-xl  shadow-sm transition-shadow duration-300 group-hover:shadow-md object-contain"
           style={{ aspectRatio: "40/60" }}
           priority
         />
@@ -49,7 +49,7 @@ function PrimaryCtaButton() {
       className="group relative hidden items-center gap-2 overflow-hidden rounded-full bg-foreground px-4 py-2.5 text-sm font-bold text-background shadow-lg shadow-foreground/10 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-foreground/20 sm:inline-flex sm:px-5"
       aria-label="الانتقال إلى قسم الانضمام للقائمة البيضاء"
     >
-      <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-background/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+      <span className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-background/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
       <Zap className="relative h-4 w-4" />
       <span className="relative hidden sm:inline">انضم مجاناً</span>
       <ArrowLeft className="relative h-4 w-4 transition-transform group-hover:-translate-x-1" />
