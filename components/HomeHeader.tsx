@@ -5,10 +5,10 @@ import { HomeHeaderActions } from "./HomeHeaderActions";
 
 function Badge() {
   return (
-    <div className="hidden items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 sm:flex" role="status" aria-label="مشروع سعودي - سجّل الآن للحصول على أولوية الوصول">
+    <div className="hidden items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary dark:bg-primary/20 dark:text-primary sm:flex" role="status" aria-label="مشروع سعودي - سجّل الآن للحصول على أولوية الوصول">
       <span className="relative flex h-1.5 w-1.5 shrink-0">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60 opacity-75" />
+        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
       </span>
       <span>
         <span className="font-bold">مشروع سعودي</span>
@@ -45,7 +45,7 @@ function Logo() {
 function PrimaryCtaButton() {
   return (
     <Link
-      href="#join"
+      href="/#join"
       className="group relative hidden items-center gap-2 overflow-hidden rounded-full bg-foreground px-4 py-2.5 text-sm font-bold text-background shadow-lg shadow-foreground/10 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-foreground/20 sm:inline-flex sm:px-5"
       aria-label="الانتقال إلى قسم الانضمام للقائمة البيضاء"
     >
@@ -57,20 +57,7 @@ function PrimaryCtaButton() {
   );
 }
 
-type SessionType = {
-  user: {
-    id: string;
-    role: "ADMIN" | "CLIENT";
-    email?: string | null;
-    name?: string | null;
-  };
-} | null;
-
-type HomeHeaderProps = {
-  session: SessionType;
-};
-
-export function HomeHeader({ session }: HomeHeaderProps) {
+export function HomeHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-foreground/5 bg-background/80 backdrop-blur-2xl backdrop-saturate-150" role="banner">
       <nav
@@ -82,8 +69,8 @@ export function HomeHeader({ session }: HomeHeaderProps) {
         <Badge />
         <div className="flex-1" />
         <div className="flex items-center gap-2 sm:gap-3">
-          <HomeHeaderActions session={session} />
-          {!session && <PrimaryCtaButton />}
+          <HomeHeaderActions />
+          <PrimaryCtaButton />
         </div>
       </nav>
     </header>

@@ -61,10 +61,10 @@ function FallbackCTA() {
 
 function MobileBadge() {
   return (
-    <div className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 sm:hidden" role="status" aria-label="مشروع سعودي - سجّل الآن للحصول على أولوية الوصول">
+    <div className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary dark:bg-primary/20 dark:text-primary sm:hidden" role="status" aria-label="مشروع سعودي - سجّل الآن للحصول على أولوية الوصول">
       <span className="relative flex h-1.5 w-1.5 shrink-0">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60 opacity-75" />
+        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
       </span>
       <span className="font-bold whitespace-nowrap">سجّل الآن</span>
     </div>
@@ -75,7 +75,7 @@ function HeroHeading({ primary, secondary }: { primary: string; secondary: strin
   return (
     <h1 className="font-black leading-tight tracking-tight text-[clamp(1.875rem,5vw,3.75rem)]">
       <span className="block text-foreground">{primary}</span>
-      <span className="mt-2 block bg-linear-to-l from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+      <span className="mt-2 block bg-linear-to-l from-primary to-accent bg-clip-text text-transparent">
         {secondary}
       </span>
     </h1>
@@ -94,10 +94,10 @@ function FeatureCard({ bullet, index }: { bullet: string; index: number }) {
   return (
     <li
       key={index}
-      className="group rounded-xl border border-border bg-card p-5 transition-colors hover:border-emerald-500/50 hover:bg-emerald-500/5"
+      className="group rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20" aria-hidden="true">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-accent shadow-lg shadow-primary/20" aria-hidden="true">
           <CheckCircle2 className="h-5 w-5 text-background" />
         </div>
         <span className="pt-1 text-sm font-medium leading-relaxed text-foreground/80 sm:text-base">
@@ -121,10 +121,10 @@ function FeatureCards({ bullets }: { bullets: string[] }) {
 function SectionSeparator() {
   return (
     <div className="relative mt-16 md:mt-20">
-      <div className="absolute inset-x-0 top-1/2 h-px bg-linear-to-r from-transparent via-emerald-500/40 to-transparent" />
+      <div className="absolute inset-x-0 top-1/2 h-px bg-linear-to-r from-transparent via-primary/40 to-transparent" />
       <div className="relative flex items-center justify-center">
-        <div className="rounded-full border border-emerald-500/20 bg-background/80 backdrop-blur-sm px-4 py-2 shadow-sm">
-          <div className="h-1.5 w-1.5 rounded-full bg-linear-to-br from-emerald-500 to-teal-600" />
+        <div className="rounded-full border border-primary/20 bg-background/80 backdrop-blur-sm px-4 py-2 shadow-sm">
+          <div className="h-1.5 w-1.5 rounded-full bg-linear-to-br from-primary to-accent" />
         </div>
       </div>
     </div>

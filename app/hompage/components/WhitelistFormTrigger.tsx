@@ -83,7 +83,7 @@ export function WhitelistFormTrigger({
     return (
       <Button
         onClick={handleClick}
-        className={`flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-l from-emerald-600 to-teal-600 py-3.5 text-base font-bold text-background shadow-lg shadow-emerald-500/25 ${className || ""}`}
+        className={`flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-l from-primary to-accent py-3.5 text-base font-bold text-primary-foreground shadow-lg shadow-primary/25 ${className || ""}`}
       >
         <Zap className="h-5 w-5" />
         <span>سجّل الآن — مجاناً</span>
@@ -94,7 +94,7 @@ export function WhitelistFormTrigger({
   return (
     <Button
       onClick={handleClick}
-      className={`group inline-flex items-center gap-2 rounded-full bg-linear-to-l from-emerald-600 to-teal-600 px-8 py-4 text-base font-bold text-background shadow-xl shadow-emerald-500/25 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/30 ${className || ""}`}
+      className={`group inline-flex items-center gap-2 rounded-full bg-linear-to-l from-primary to-accent px-8 py-4 text-base font-bold text-primary-foreground shadow-xl shadow-primary/25 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/30 ${className || ""}`}
     >
       {children || (
         <>

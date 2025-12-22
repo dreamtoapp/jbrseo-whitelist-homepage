@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { auth } from "@/auth";
 import { GTMProvider } from "@/components/GTMProvider";
 import { HomeHeader } from "@/components/HomeHeader";
 import { HomePageFooter, type HomePageFooterContent } from "@/components/HomePageFooter";
@@ -138,11 +137,6 @@ async function getHomePageContent(): Promise<HomePageFooterContent> {
   );
 }
 
-async function getSession() {
-  const session = await auth().catch(() => null);
-  return session;
-}
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -165,7 +159,7 @@ export default async function RootLayout({
             <NotificationHandler />
           </Suspense>
           <Suspense fallback={<div className="h-16 md:h-20" />}>
-            <HeaderWithSession />
+            <HomeHeader />
           </Suspense>
           {children}
           <HomePageFooter content={footerContent} />
@@ -176,10 +170,5 @@ export default async function RootLayout({
       </body>
     </html>
   );
-}
-
-async function HeaderWithSession() {
-  const session = await getSession();
-  return <HomeHeader session={session} />;
 }
 

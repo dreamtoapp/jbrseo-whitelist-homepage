@@ -6,10 +6,13 @@ export const whitelistSchema = z.object({
   mobile: z
     .string()
     .trim()
-    .transform((val) => val.replace(/\s+/g, ""))
     .refine(
-      (val) => val.length === 0 || /^05\d{8}$/.test(val),
-      "رقم الجوال يجب أن يكون 10 أرقام بصيغة 05xxxxxxxx"
+      (val) => val.length > 0,
+      "رقم الجوال مطلوب"
+    )
+    .refine(
+      (val) => /^\+\d{6,15}$/.test(val),
+      "رقم الجوال يجب أن يكون بصيغة دولية صحيحة (مثال: +966501234567)"
     ),
   brandName: z.string().trim().min(1, "اسم العلامة مطلوب").max(120, "اسم العلامة طويل جدًا"),
 });

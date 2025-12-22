@@ -20,11 +20,34 @@ import { useState } from "react";
 import { type z } from "zod";
 import { Loader2, Lock, Sparkles } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const COUNTRY_OPTIONS = [
+  { code: "+966", label: "السعودية (+966)", localLength: 9, startsWith: ["5"] },
+  { code: "+971", label: "الإمارات (+971)", localLength: 9, startsWith: ["5"] },
+  { code: "+974", label: "قطر (+974)", localLength: 8, startsWith: ["3", "5", "6", "7"] },
+  { code: "+965", label: "الكويت (+965)", localLength: 8, startsWith: ["5", "6", "9"] },
+  { code: "+973", label: "البحرين (+973)", localLength: 8, startsWith: ["3", "6"] },
+  { code: "+968", label: "عُمان (+968)", localLength: 8, startsWith: ["7", "9"] },
+  { code: "+20", label: "مصر (+20)", localLength: 10, startsWith: ["1"] },
+] as const;
 
 export function WhitelistForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResendDialogOpen, setIsResendDialogOpen] = useState(false);
   const [resendEmail, setResendEmail] = useState<string | null>(null);
+  const [countryCode, setCountryCode] = useState<string>(COUNTRY_OPTIONS[0]?.code ?? "+966");
+  const [localMobile, setLocalMobile] = useState<string>("");
+
+  const currentCountry =
+    COUNTRY_OPTIONS.find((country) => country.code === countryCode) ?? COUNTRY_OPTIONS[0];
+  const localMaxLength = currentCountry.localLength;
 
   type WhitelistFormFields = z.input<typeof whitelistSchema>;
 
@@ -66,6 +89,23 @@ export function WhitelistForm() {
   };
 
   async function onSubmit(data: WhitelistFormData) {
+    const country =
+      COUNTRY_OPTIONS.find((option) => option.code === countryCode) ?? COUNTRY_OPTIONS[0];
+
+    const firstDigit = localMobile[0];
+    if (
+      !localMobile ||
+      localMobile.length !== country.localLength ||
+      !firstDigit ||
+      !(country.startsWith as readonly string[]).includes(firstDigit)
+    ) {
+      form.setError("mobile", {
+        type: "validate",
+        message: "صيغة رقم الجوال لا تناسب البلد المختار",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const result = await submitWhitelist(data);
@@ -113,7 +153,7 @@ export function WhitelistForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-sm font-medium">
-                البريد الإلكتروني <span className="text-emerald-500">*</span>
+                البريد الإلكتروني <span className="text-primary">*</span>
               </FormLabel>
               <FormControl>
                 <Input
@@ -136,7 +176,7 @@ export function WhitelistForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-sm font-medium">
-                الاسم <span className="text-emerald-500">*</span>
+                الاسم <span className="text-primary">*</span>
               </FormLabel>
               <FormControl>
                 <Input
@@ -157,7 +197,7 @@ export function WhitelistForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-sm font-medium">
-                العلامة التجارية <span className="text-emerald-500">*</span>
+                العلامة التجارية <span className="text-primary">*</span>
               </FormLabel>
               <FormControl>
                 <Input
@@ -178,22 +218,48 @@ export function WhitelistForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-sm font-medium text-foreground/70">
-                رقم الجوال <span className="text-muted-foreground/70 text-xs font-normal">(اختياري)</span>
+                رقم الجوال <span className="text-primary">*</span>
               </FormLabel>
               <FormControl>
-                <Input
-                  type="tel"
-                  placeholder="مثال: 0501234567"
-                  autoComplete="tel"
-                  inputMode="tel"
-                  maxLength={10}
-                  className="h-10 rounded-xl sm:h-11"
-                  {...field}
-                />
+                <div className="flex gap-2">
+                  <div className="w-32">
+                    <Select
+                      value={countryCode}
+                      onValueChange={(value) => {
+                        setCountryCode(value);
+                        const full = `${value}${localMobile}`;
+                        field.onChange(full);
+                      }}
+                    >
+                      <SelectTrigger className="h-10 rounded-xl sm:h-11">
+                        <SelectValue placeholder="رمز الدولة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRY_OPTIONS.map((option) => (
+                          <SelectItem key={option.code} value={option.code}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Input
+                    type="tel"
+                    placeholder="مثال: 501234567"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    maxLength={localMaxLength}
+                    className="h-10 rounded-xl sm:h-11"
+                    value={localMobile}
+                    onChange={(event) => {
+                      const digitsOnly = event.target.value.replace(/\D/g, "");
+                      setLocalMobile(digitsOnly);
+                      const full = `${countryCode}${digitsOnly}`;
+                      field.onChange(full);
+                    }}
+                  />
+                </div>
               </FormControl>
-              <FormDescription className="text-xs text-muted-foreground/60">
-                {field.value.length}/10 أرقام
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -202,7 +268,7 @@ export function WhitelistForm() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="mt-1 h-10 w-full rounded-xl bg-emerald-600 text-sm font-semibold text-background hover:bg-emerald-700 disabled:opacity-50 sm:h-11 sm:text-base"
+          className="mt-1 h-10 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 sm:h-11 sm:text-base"
         >
           {isSubmitting ? (
             <>
