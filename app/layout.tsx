@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { GTMProvider } from "@/components/GTMProvider";
+import { HotjarProvider } from "@/components/HotjarProvider";
 import { HomeHeader } from "@/components/HomeHeader";
 import { HomePageFooter, type HomePageFooterContent } from "@/components/HomePageFooter";
 import { prisma } from "@/helpers/prisma";
@@ -151,6 +152,8 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://static.hotjar.com" />
+        <link rel="dns-prefetch" href="https://script.hotjar.com" />
       </head>
       <body className="font-sans">
         <ThemeProvider>
@@ -165,6 +168,9 @@ export default async function RootLayout({
           <HomePageFooter content={footerContent} />
           <Suspense fallback={null}>
             <GTMProvider />
+          </Suspense>
+          <Suspense fallback={null}>
+            <HotjarProvider />
           </Suspense>
         </ThemeProvider>
       </body>
